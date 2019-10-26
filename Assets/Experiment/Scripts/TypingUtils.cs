@@ -12,6 +12,9 @@ public static class TypingUtils
         return (transcribedText.Length - 1) / timing * 12f; // 60 * 1/5
     }
 
+    public static float KSPC(int keystrokeCount, string transcribedText) {
+        return (float) keystrokeCount / transcribedText.Length;
+    }
 
     public static int costOfSubstitution(char a, char b) {
         return a == b ? 0 : 1;

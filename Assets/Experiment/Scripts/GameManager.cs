@@ -15,6 +15,7 @@ public class GameManager : MonoBehaviour
     private float startTypingTime;
     public TextMeshProUGUI textWPM;
     public TextMeshProUGUI textER;
+    private int keyStrokeCount;
 
     async void Start()
     {
@@ -29,6 +30,8 @@ public class GameManager : MonoBehaviour
 
     void Keyboard_OnKeyPress(string s)
     {
+        keyStrokeCount += 1;
+
         if (typingActive == false) // start typing
         {
             typingActive = true;
@@ -47,10 +50,11 @@ public class GameManager : MonoBehaviour
 
         if (s.Equals(">")) // enter (i.e. end of the phrase, stop typing)
         {
-            SetPhrase();
             float timing = Time.time - startTypingTime;
             textWPM.text = Mathf.Round(TypingUtils.WordsPerMinute(currentTranscribedText, timing)) + " wpm";
             textER.text = Mathf.Round(TypingUtils.ErrorRate(textPresented.text, currentTranscribedText)) + " %";
+            Debug.Log(TypingUtils.KSPC(keyStrokeCount-1, currentTranscribedText)); // minus 1 to remove Enter keystroke
+            SetPhrase();
             return;
         }
 
@@ -63,6 +67,7 @@ public class GameManager : MonoBehaviour
     private void SetPhrase()
     {
         inputField.text = "_";
+        keyStrokeCount = 0;
         int index = Random.Range(0, phrases.Count);
         string phrase = phrases[index];
         phrases.RemoveAt(index);
