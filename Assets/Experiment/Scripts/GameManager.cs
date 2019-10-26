@@ -10,10 +10,11 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI textPresented;
     public Color colorTypingInactive;
     public Color colorTypingActive;
-
     private bool typingActive;
-
     private List<string> phrases;
+    private float startTypingTime;
+    public TextMeshProUGUI textWPM;
+    public TextMeshProUGUI textER;
 
     async void Start()
     {
@@ -28,10 +29,12 @@ public class GameManager : MonoBehaviour
 
     void Keyboard_OnKeyPress(string s)
     {
-        if (!typingActive)
+        if (typingActive == false) // start typing
         {
             typingActive = true;
             textPresented.color = colorTypingActive;
+
+            startTypingTime = Time.time;
         }
 
         if (s.Equals("<")) // backspace
@@ -40,17 +43,19 @@ public class GameManager : MonoBehaviour
                 inputField.text = inputField.text.Substring(0, inputField.text.Length-2) + "_";
             return;
         }
+        string currentTranscribedText = inputField.text.Substring(0, inputField.text.Length-1);
 
-        if (s.Equals(">")) // enter
+        if (s.Equals(">")) // enter (i.e. end of the phrase, stop typing)
         {
             SetPhrase();
+            float timing = Time.time - startTypingTime;
+            textWPM.text = Mathf.Round(TypingUtils.WordsPerMinute(currentTranscribedText, timing)) + " wpm";
+            textER.text = Mathf.Round(TypingUtils.ErrorRate(textPresented.text, currentTranscribedText)) + " %";
             return;
         }
 
         if (s.Equals("_")) // space
             s = " ";
-
-        string currentTranscribedText = inputField.text.Substring(0, inputField.text.Length-1);
 
         inputField.text = currentTranscribedText + s + "_";
     }
