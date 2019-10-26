@@ -8,6 +8,10 @@ public class GameManager : MonoBehaviour
     public Keyboard keyboard;
     public TMP_InputField inputField;
     public TextMeshProUGUI textPresented;
+    public Color colorTypingInactive;
+    public Color colorTypingActive;
+
+    private bool typingActive;
 
     private List<string> phrases;
 
@@ -24,6 +28,12 @@ public class GameManager : MonoBehaviour
 
     void Keyboard_OnKeyPress(string s)
     {
+        if (!typingActive)
+        {
+            typingActive = true;
+            textPresented.color = colorTypingActive;
+        }
+
         if (s.Equals("<")) // backspace
         {
             if (inputField.text.Length > 1)
@@ -52,5 +62,7 @@ public class GameManager : MonoBehaviour
         string phrase = phrases[index];
         phrases.RemoveAt(index);
         textPresented.text = phrase;
+        textPresented.color = colorTypingInactive;
+        typingActive = false;
     }
 }
