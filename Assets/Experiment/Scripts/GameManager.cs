@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using TMPro;
-using System.Collections;
 using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour
@@ -46,9 +45,12 @@ public class GameManager : MonoBehaviour
         if (s.Equals(">")) // enter (i.e. end of the phrase, stop typing)
         {
             float timing = lastPressTime - startTypingTime;
-            textWPM.text = Mathf.Round(TypingUtils.WordsPerMinute(currentTranscribedText, timing)) + " wpm";
-            textER.text = Mathf.Round(TypingUtils.ErrorRate(textPresented.text, currentTranscribedText)) + " %";
-            Debug.Log(TypingUtils.KSPC(keyStrokeCount-1, currentTranscribedText)); // minus 1 to remove Enter keystroke
+            float wpm = TypingUtils.WordsPerMinute(currentTranscribedText, timing);
+            float er = TypingUtils.ErrorRate(textPresented.text, currentTranscribedText);
+            float kspc = TypingUtils.KSPC(keyStrokeCount-1, currentTranscribedText); // minus 1 to remove Enter keystroke
+            textWPM.text = Mathf.Round(wpm) + " wpm";
+            textER.text = Mathf.Round(er) + " %";
+            LogEssential(textPresented.text, currentTranscribedText, wpm, er, kspc);
             SetPhrase();
             return;
         }
@@ -77,5 +79,18 @@ public class GameManager : MonoBehaviour
         textPresented.text = phrase;
         textPresented.color = colorTypingInactive;
         typingActive = false;
+    }
+
+    private void LogEssential(string presentedText, string transcribedText, float WPM, float ER, float KSPC)
+    {
+        string s = System.DateTime.Now.ToString("yyyy-mm-dd hh:mm:ss.fff") + "\t" +
+            presentedText + "\t" +
+            transcribedText + "\t" +
+            WPM + "\t" +
+            ER + "\t" +
+            KSPC + "\n";
+            
+        Debug.Log(s);
+        FileUtils.AppendTextToFile(Application.dataPath + "/logs.txt", s);
     }
 }

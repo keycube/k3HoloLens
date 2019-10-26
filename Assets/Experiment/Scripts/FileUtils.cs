@@ -27,4 +27,22 @@ public static class FileUtils
         return s;
 #endif
     }
+
+    public static async void AppendTextToFile(string path, string text)
+    {
+#if WINDOWS_UWP
+        path = "Keycube" + path;
+
+        // For HoloLens, the root folder is 'Documents'
+        StorageFolder storageFolderDocuments = KnownFolders.DocumentsLibrary;
+
+        // For UWP, the path is written with '\' insteand of '/'
+        path = path.Replace("/", "\\");
+
+        StorageFile storageFile = await storageFolderDocuments.GetFileAsync(path);
+        await FileIO.AppendTextAsync(storageFile, text);
+#else
+        File.AppendAllText(path, text);
+#endif
+    }
 }
