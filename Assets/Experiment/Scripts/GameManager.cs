@@ -13,6 +13,7 @@ public class GameManager : MonoBehaviour
     private bool typingActive;
     private List<string> phrases;
     private float startTypingTime;
+    private float lastPressTime;
     public TextMeshProUGUI textWPM;
     public TextMeshProUGUI textER;
     private int keyStrokeCount;
@@ -40,17 +41,11 @@ public class GameManager : MonoBehaviour
             startTypingTime = Time.time;
         }
 
-        if (s.Equals("<")) // backspace
-        {
-            if (inputField.text.Length > 1)
-                inputField.text = inputField.text.Substring(0, inputField.text.Length-2) + "_";
-            return;
-        }
         string currentTranscribedText = inputField.text.Substring(0, inputField.text.Length-1);
 
         if (s.Equals(">")) // enter (i.e. end of the phrase, stop typing)
         {
-            float timing = Time.time - startTypingTime;
+            float timing = lastPressTime - startTypingTime;
             textWPM.text = Mathf.Round(TypingUtils.WordsPerMinute(currentTranscribedText, timing)) + " wpm";
             textER.text = Mathf.Round(TypingUtils.ErrorRate(textPresented.text, currentTranscribedText)) + " %";
             Debug.Log(TypingUtils.KSPC(keyStrokeCount-1, currentTranscribedText)); // minus 1 to remove Enter keystroke
@@ -58,9 +53,17 @@ public class GameManager : MonoBehaviour
             return;
         }
 
+        lastPressTime = Time.time;
+        
+        if (s.Equals("<")) // backspace
+        {
+            if (inputField.text.Length > 1)
+                inputField.text = inputField.text.Substring(0, inputField.text.Length-2) + "_";
+            return;
+        }
+
         if (s.Equals("_")) // space
             s = " ";
-
         inputField.text = currentTranscribedText + s + "_";
     }
 
