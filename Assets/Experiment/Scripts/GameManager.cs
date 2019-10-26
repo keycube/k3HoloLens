@@ -26,8 +26,8 @@ public class GameManager : MonoBehaviour
     {
         if (s.Equals("<")) // backspace
         {
-            if (inputField.text.Length > 0)
-                inputField.text = inputField.text.Substring(0, inputField.text.Length-1);
+            if (inputField.text.Length > 1)
+                inputField.text = inputField.text.Substring(0, inputField.text.Length-2) + "_";
             return;
         }
 
@@ -40,11 +40,14 @@ public class GameManager : MonoBehaviour
         if (s.Equals("_")) // space
             s = " ";
 
-        inputField.text += s;
+        string currentTranscribedText = inputField.text.Substring(0, inputField.text.Length-1);
+
+        inputField.text = currentTranscribedText + s + "_";
     }
 
     private void SetPhrase()
     {
+        inputField.text = "_";
         int index = Random.Range(0, phrases.Count);
         string phrase = phrases[index];
         phrases.RemoveAt(index);
