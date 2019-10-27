@@ -20,9 +20,7 @@ public class GameManager : MonoBehaviour
     private string currentUserCode = "unknown";
     public TextMeshProUGUI textCurrentUserCode;
     public TextMeshProUGUI textCurrentTextEntryInterface;
-    
-
-    // TODO add fullInputStream to log;
+    private string fullTranscribedInputStream;
 
     async void Start()
     {
@@ -41,6 +39,7 @@ public class GameManager : MonoBehaviour
 
     void Keyboard_OnKeyPress(string s)
     {
+        fullTranscribedInputStream += s;
         keyStrokeCount += 1;
 
         if (typingActive == false) // start typing
@@ -83,6 +82,7 @@ public class GameManager : MonoBehaviour
     private void SetPhrase()
     {
         inputField.text = "_";
+        fullTranscribedInputStream = "";
         keyStrokeCount = 0;
         int index = Random.Range(0, phrases.Count);
         string phrase = phrases[index];
@@ -101,7 +101,9 @@ public class GameManager : MonoBehaviour
             transcribedText + "\t" +
             WPM + "\t" +
             ER + "\t" +
-            KSPC + "\n";
+            KSPC + "\t" + 
+            (keyStrokeCount-1) + "\t" + // minus 1 to remove Enter keystroke
+            fullTranscribedInputStream + "\n"; 
             
         Debug.Log(s);
         FileUtils.AppendTextToFile(Application.dataPath + "/logs.txt", s);
