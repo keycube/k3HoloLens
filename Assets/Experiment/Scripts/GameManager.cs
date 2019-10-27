@@ -16,6 +16,13 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI textWPM;
     public TextMeshProUGUI textER;
     private int keyStrokeCount;
+    private string currentTextEntryInterface = "unknown";
+    private string currentUserCode = "unknown";
+    public TextMeshProUGUI textCurrentUserCode;
+    public TextMeshProUGUI textCurrentTextEntryInterface;
+    
+
+    // TODO add fullInputStream to log;
 
     async void Start()
     {
@@ -25,6 +32,10 @@ public class GameManager : MonoBehaviour
         string s = await FileUtils.ReadTextFile("Assets/Experiment/Resources/phrases2.txt"); 
         phrases = new List<string>(s.Split('\n'));
 
+        NetworkUtils network = new NetworkUtils();
+        network.OnMessageReceived += NetworkUtils_OnMessageReceived;
+        network.StartServer("55555");
+        
         SetPhrase();
     }
 
@@ -84,6 +95,8 @@ public class GameManager : MonoBehaviour
     private void LogEssential(string presentedText, string transcribedText, float WPM, float ER, float KSPC)
     {
         string s = System.DateTime.Now.ToString("yyyy-mm-dd hh:mm:ss.fff") + "\t" +
+            currentUserCode + "\t" +
+            currentTextEntryInterface + "\t" +
             presentedText + "\t" +
             transcribedText + "\t" +
             WPM + "\t" +
@@ -92,5 +105,35 @@ public class GameManager : MonoBehaviour
             
         Debug.Log(s);
         FileUtils.AppendTextToFile(Application.dataPath + "/logs.txt", s);
+    }
+
+    private void NetworkUtils_OnMessageReceived(string message)
+    {
+        string[] data = message.Split(':');
+        switch(data[0])
+        {
+            case "u": // user
+                currentUserCode = data[1];
+                textCurrentUserCode.SetText(currentUserCode);
+            break;
+            case "i": // interface
+                currentTextEntryInterface = data[1].TrimEnd();
+                switch(currentTextEntryInterface)
+                {
+                    case "hggk":
+                        textCurrentTextEntryInterface.text = "HoloLens Gaze Gesture Keyboard";
+                    break;
+                    case "ssk":
+                        textCurrentTextEntryInterface.text = "Smartphone Soft Keyboard";
+                    break;
+                    case "kc":
+                        textCurrentTextEntryInterface.text = "Keycube";
+                    break;
+                }
+            break;
+            case "k": // key press
+                Keyboard_OnKeyPress(data[1]);
+            break;
+        }
     }
 }
