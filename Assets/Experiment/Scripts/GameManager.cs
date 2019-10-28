@@ -111,7 +111,8 @@ public class GameManager : MonoBehaviour
 
     private void NetworkUtils_OnMessageReceived(string message)
     {
-        string[] data = message.Split(':');
+
+        string[] data = message.TrimEnd().Split(':');
         switch(data[0])
         {
             case "u": // user
@@ -119,7 +120,7 @@ public class GameManager : MonoBehaviour
                 textCurrentUserCode.SetText(currentUserCode);
             break;
             case "i": // interface
-                currentTextEntryInterface = data[1].TrimEnd();
+                currentTextEntryInterface = data[1];
                 switch(currentTextEntryInterface)
                 {
                     case "hggk":
