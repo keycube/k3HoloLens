@@ -21,6 +21,10 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI textCurrentUserCode;
     public TextMeshProUGUI textCurrentTextEntryInterface;
     private string fullTranscribedInputStream;
+    private bool started;
+    private float timeLeft;
+    public RectTransform panelTime;
+    private static float SESSION_TIMING = 1200f;
 
     async void Start()
     {
@@ -35,6 +39,24 @@ public class GameManager : MonoBehaviour
         network.StartServer("55555");
         
         SetPhrase();
+    }
+
+    void Update()
+    {
+        if (started)
+        {
+            timeLeft -= Time.deltaTime;
+            if (timeLeft < 0) 
+            {
+                FinishSession();
+            }
+            panelTime.sizeDelta = new Vector2(Mathf.Lerp(400, 0, timeLeft/SESSION_TIMING), panelTime.sizeDelta.y);
+        }
+
+        if (Input.GetKeyDown("space"))
+        {
+            StartSession();
+        }
     }
 
     void Keyboard_OnKeyPress(string s)
@@ -57,10 +79,12 @@ public class GameManager : MonoBehaviour
             float timing = lastPressTime - startTypingTime;
             float wpm = TypingUtils.WordsPerMinute(currentTranscribedText, timing);
             float er = TypingUtils.ErrorRate(textPresented.text, currentTranscribedText);
-            float kspc = TypingUtils.KSPC(keyStrokeCount-1, currentTranscribedText); // minus 1 to remove Enter keystroke
             textWPM.text = Mathf.Round(wpm) + " wpm";
             textER.text = Mathf.Round(er) + " %";
-            LogEssential(textPresented.text, currentTranscribedText, wpm, er, kspc);
+            if (started)
+            {
+                LogEssential(textPresented.text, currentTranscribedText, wpm, er);
+            }                
             SetPhrase();
             return;
         }
@@ -84,16 +108,21 @@ public class GameManager : MonoBehaviour
         inputField.text = "_";
         fullTranscribedInputStream = "";
         keyStrokeCount = 0;
-        int index = Random.Range(0, phrases.Count);
-        string phrase = phrases[index];
-        phrases.RemoveAt(index);
+        string phrase = "abcdefghijklmnopqrstuvwxyz";
+        if (started)
+        {
+            int index = Random.Range(0, phrases.Count);
+            phrase = phrases[index];
+            phrases.RemoveAt(index);
+        }
         textPresented.text = phrase;
         textPresented.color = colorTypingInactive;
         typingActive = false;
     }
 
-    private void LogEssential(string presentedText, string transcribedText, float WPM, float ER, float KSPC)
+    private void LogEssential(string presentedText, string transcribedText, float WPM, float ER)
     {
+        float KSPC = TypingUtils.KSPC(keyStrokeCount-1, transcribedText); // minus 1 to remove Enter keystroke
         string s = System.DateTime.Now.ToString("yyyy-mm-dd hh:mm:ss.fff") + "\t" +
             currentUserCode + "\t" +
             currentTextEntryInterface + "\t" +
@@ -137,6 +166,21 @@ public class GameManager : MonoBehaviour
             case "k": // key press
                 Keyboard_OnKeyPress(data[1]);
             break;
+            case "s":
+                StartSession();
+            break;
         }
+    }
+
+    private void StartSession()
+    {
+        timeLeft = SESSION_TIMING;
+        started = true;
+    }
+
+    private void FinishSession()
+    {
+        started = false;
+        textPresented.text = "STOP";
     }
 }
