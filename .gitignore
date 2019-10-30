@@ -107,3 +107,5 @@ stylecop.*
 /Assets/AssetStoreTools*
 WSATestCertificate.pfx
 WSATestCertificate.pfx.meta
+
+*.app

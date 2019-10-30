@@ -45,6 +45,10 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Escape)) {
+            Application.Quit();
+        }
+
         if (started)
         {
             timeLeft -= Time.deltaTime;
@@ -84,46 +88,54 @@ public class GameManager : MonoBehaviour
 
     void Keyboard_OnKeyPress(string s)
     {
-        fullTranscribedInputStream += s;
-        keyStrokeCount += 1;
-
-        if (typingActive == false) // start typing
+        if (s.Length > 1)
         {
-            typingActive = true;
-            textPresented.color = colorTypingActive;
-
-            startTypingTime = Time.time;
+            LogPress(s, false);
         }
-
-        string currentTranscribedText = inputFieldTranscribed.text.Substring(0, inputFieldTranscribed.text.Length-1);
-
-        if (s.Equals(">")) // enter (i.e. end of the phrase, stop typing)
+        else
         {
-            float timing = lastPressTime - startTypingTime;
-            float wpm = TypingUtils.WordsPerMinute(currentTranscribedText, timing);
-            float er = TypingUtils.ErrorRate(textPresented.text, currentTranscribedText);
-            textWPM.text = Mathf.Round(wpm) + " wpm";
-            textER.text = Mathf.Round(er) + " %";
-            if (started)
+            LogPress(s, true);
+            fullTranscribedInputStream += s;
+            keyStrokeCount += 1;
+
+            if (typingActive == false) // start typing
             {
-                LogEssential(textPresented.text, currentTranscribedText, wpm, er);
-            }                
-            SetPhrase();
-            return;
-        }
+                typingActive = true;
+                textPresented.color = colorTypingActive;
 
-        lastPressTime = Time.time;
-        
-        if (s.Equals("<")) // backspace
-        {
-            if (inputFieldTranscribed.text.Length > 1)
-                inputFieldTranscribed.text = inputFieldTranscribed.text.Substring(0, inputFieldTranscribed.text.Length-2) + "_";
-            return;
-        }
+                startTypingTime = Time.time;
+            }
 
-        if (s.Equals("_")) // space
-            s = " ";
-        inputFieldTranscribed.text = currentTranscribedText + s + "_";
+            string currentTranscribedText = inputFieldTranscribed.text.Substring(0, inputFieldTranscribed.text.Length-1);
+
+            if (s.Equals(">")) // enter (i.e. end of the phrase, stop typing)
+            {
+                float timing = lastPressTime - startTypingTime;
+                float wpm = TypingUtils.WordsPerMinute(currentTranscribedText, timing);
+                float er = TypingUtils.ErrorRate(textPresented.text, currentTranscribedText);
+                textWPM.text = Mathf.Round(wpm) + " wpm";
+                textER.text = Mathf.Round(er) + " %";
+                if (started)
+                {
+                    LogEssential(textPresented.text, currentTranscribedText, wpm, er);
+                }                
+                SetPhrase();
+                return;
+            }
+
+            lastPressTime = Time.time;
+            
+            if (s.Equals("<")) // backspace
+            {
+                if (inputFieldTranscribed.text.Length > 1)
+                    inputFieldTranscribed.text = inputFieldTranscribed.text.Substring(0, inputFieldTranscribed.text.Length-2) + "_";
+                return;
+            }
+
+            if (s.Equals("_")) // space
+                s = " ";
+            inputFieldTranscribed.text = currentTranscribedText + s + "_";
+        }
     }
 
     private void SetPhrase()
@@ -155,10 +167,21 @@ public class GameManager : MonoBehaviour
             ER + "\t" +
             KSPC + "\t" + 
             (keyStrokeCount-1) + "\t" + // minus 1 to remove Enter keystroke
-            fullTranscribedInputStream + "\n"; 
+            fullTranscribedInputStream + "\n";
             
         Debug.Log(s);
-        FileUtils.AppendTextToFile(Application.dataPath + "/logs.txt", s);
+        FileUtils.AppendTextToFile(Application.dataPath + "/" + currentUserCode + "_essential.txt", s);
+    }
+
+    private void LogPress(string s, bool allowed)
+    {
+        string log = System.DateTime.Now.ToString("yyyy-mm-dd hh:mm:ss.fff") + "\t" +
+            currentUserCode + "\t" +
+            currentTextEntryInterface + "\t" +
+            allowed + "\t" +
+            s + "\n";
+        Debug.Log(log);
+        FileUtils.AppendTextToFile(Application.dataPath + "/" + currentUserCode + "_press.txt", log);
     }
 
     private void NetworkUtils_OnMessageReceived(string message)
@@ -216,6 +239,5 @@ public class GameManager : MonoBehaviour
     private void FinishSession()
     {
         started = false;
-        textPresented.text = "STOP";
     }
 }
