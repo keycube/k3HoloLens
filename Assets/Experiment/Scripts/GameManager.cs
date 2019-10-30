@@ -4,8 +4,8 @@ using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour
 {
-    public Keyboard keyboard;
-    public TMP_InputField inputField;
+    public GameObject keyboard;
+    public TMP_InputField inputFieldTranscribed;
     public TextMeshProUGUI textPresented;
     public Color colorTypingInactive;
     public Color colorTypingActive;
@@ -24,12 +24,14 @@ public class GameManager : MonoBehaviour
     private bool started;
     private float timeLeft;
     public RectTransform panelTime;
-    private static float SESSION_TIMING = 1200f;
+    private static float SESSION_TIMING;
 
     async void Start()
     {
-        keyboard.OnKeyPress += Keyboard_OnKeyPress;
-        inputField.Select();
+        keyboard.GetComponent<Keyboard>().OnKeyPress += Keyboard_OnKeyPress;
+        keyboard.SetActive(false);
+
+        inputFieldTranscribed.Select();
 
         string s = await FileUtils.ReadTextFile("Assets/Experiment/Resources/phrases2.txt"); 
         phrases = new List<string>(s.Split('\n'));
@@ -53,9 +55,30 @@ public class GameManager : MonoBehaviour
             panelTime.sizeDelta = new Vector2(Mathf.Lerp(400, 0, timeLeft/SESSION_TIMING), panelTime.sizeDelta.y);
         }
 
-        if (Input.GetKeyDown("space"))
+        if (currentTextEntryInterface.Equals("tk"))
         {
-            StartSession();
+            if (Input.GetKeyDown(KeyCode.Return))
+            {
+                Keyboard_OnKeyPress(">");
+            }
+
+            if (Input.GetKeyDown(KeyCode.Backspace))
+            {
+                Keyboard_OnKeyPress("<");
+            }
+
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                Keyboard_OnKeyPress(" ");
+            }
+
+            for (int i = (int)KeyCode.A; i <= (int)KeyCode.Z; i++)
+            {
+                if (Input.GetKeyDown((KeyCode)i))
+                {
+                    Keyboard_OnKeyPress(((KeyCode)i).ToString().ToLower());
+                }
+            }
         }
     }
 
@@ -72,7 +95,7 @@ public class GameManager : MonoBehaviour
             startTypingTime = Time.time;
         }
 
-        string currentTranscribedText = inputField.text.Substring(0, inputField.text.Length-1);
+        string currentTranscribedText = inputFieldTranscribed.text.Substring(0, inputFieldTranscribed.text.Length-1);
 
         if (s.Equals(">")) // enter (i.e. end of the phrase, stop typing)
         {
@@ -93,19 +116,19 @@ public class GameManager : MonoBehaviour
         
         if (s.Equals("<")) // backspace
         {
-            if (inputField.text.Length > 1)
-                inputField.text = inputField.text.Substring(0, inputField.text.Length-2) + "_";
+            if (inputFieldTranscribed.text.Length > 1)
+                inputFieldTranscribed.text = inputFieldTranscribed.text.Substring(0, inputFieldTranscribed.text.Length-2) + "_";
             return;
         }
 
         if (s.Equals("_")) // space
             s = " ";
-        inputField.text = currentTranscribedText + s + "_";
+        inputFieldTranscribed.text = currentTranscribedText + s + "_";
     }
 
     private void SetPhrase()
     {
-        inputField.text = "_";
+        inputFieldTranscribed.text = "_";
         fullTranscribedInputStream = "";
         keyStrokeCount = 0;
         string phrase = "abcdefghijklmnopqrstuvwxyz";
@@ -153,13 +176,24 @@ public class GameManager : MonoBehaviour
                 switch(currentTextEntryInterface)
                 {
                     case "hggk":
+                        SESSION_TIMING = 1200f; // 20 min
                         textCurrentTextEntryInterface.text = "HoloLens Gaze Gesture Keyboard";
+                        keyboard.SetActive(true);
                     break;
                     case "ssk":
+                        SESSION_TIMING = 1200f; // 20 min
                         textCurrentTextEntryInterface.text = "Smartphone Soft Keyboard";
+                        keyboard.SetActive(false);
                     break;
                     case "kc":
+                        SESSION_TIMING = 1200f; // 20 min
                         textCurrentTextEntryInterface.text = "Keycube";
+                        keyboard.SetActive(false);
+                    break;
+                    case "tk":
+                        SESSION_TIMING = 300f; // 5 min
+                        textCurrentTextEntryInterface.text = "Traditional Keyboard";
+                        keyboard.SetActive(false);
                     break;
                 }
             break;
@@ -176,6 +210,7 @@ public class GameManager : MonoBehaviour
     {
         timeLeft = SESSION_TIMING;
         started = true;
+        SetPhrase();
     }
 
     private void FinishSession()
