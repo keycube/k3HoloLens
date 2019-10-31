@@ -27,6 +27,7 @@ public class GameManager : MonoBehaviour
     private static float SESSION_TIMING;
     private float previousKeyPressTime;
     private string logPressBulk;
+    private bool finish;
 
     async void Start()
     {
@@ -130,6 +131,11 @@ public class GameManager : MonoBehaviour
                 {
                     LogEssential(textPresented.text, currentTranscribedText, wpm, er);
                     BulkLogPress();
+                    if (finish)
+                    {
+                        finish = false;
+                        started = false;
+                    }
                 }                
                 SetPhrase();
                 return;
@@ -278,6 +284,6 @@ public class GameManager : MonoBehaviour
 
     private void FinishSession()
     {
-        started = false;
+        finish = true;
     }
 }
