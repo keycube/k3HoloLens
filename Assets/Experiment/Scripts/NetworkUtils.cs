@@ -24,7 +24,7 @@ public class NetworkUtils : MonoBehaviour
 
     private string portNumber;
 
-    public void StartServer(string portNumber)
+    public async void StartServer(string portNumber)
     {
         this.portNumber = portNumber;
         try

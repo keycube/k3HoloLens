@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 
 #if WINDOWS_UWP
+using System;
 using Windows.Storage;
 #endif
 
@@ -10,7 +11,7 @@ public static class FileUtils
     public static async Task<string> ReadTextFile(string path)
     {
 #if WINDOWS_UWP
-        path = "Keycube" + path;
+        path = "Keycube/" + path;
 
         // For HoloLens, the root folder is 'Documents'
         StorageFolder storageFolderDocuments = KnownFolders.DocumentsLibrary;
@@ -31,7 +32,7 @@ public static class FileUtils
     public static async void AppendTextToFile(string path, string text)
     {
 #if WINDOWS_UWP
-        path = "Keycube" + path;
+        path = "Keycube/" + path;
 
         // For HoloLens, the root folder is 'Documents'
         StorageFolder storageFolderDocuments = KnownFolders.DocumentsLibrary;
@@ -39,7 +40,8 @@ public static class FileUtils
         // For UWP, the path is written with '\' insteand of '/'
         path = path.Replace("/", "\\");
 
-        StorageFile storageFile = await storageFolderDocuments.GetFileAsync(path);
+        StorageFile storageFile = await storageFolderDocuments.CreateFileAsync(path, CreationCollisionOption.OpenIfExists);
+        //StorageFile storageFile = await storageFolderDocuments.GetFileAsync(path);
         await FileIO.AppendTextAsync(storageFile, text);
 #else
         File.AppendAllText(path, text);

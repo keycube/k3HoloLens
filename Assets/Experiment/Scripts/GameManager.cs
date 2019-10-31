@@ -175,7 +175,11 @@ public class GameManager : MonoBehaviour
             fullTranscribedInputStream + "\n";
             
         Debug.Log(s);
+#if WINDOWS_UWP
+        FileUtils.AppendTextToFile(currentUserCode + "_essential.txt", s);
+#else
         FileUtils.AppendTextToFile(Application.dataPath + "/" + currentUserCode + "_essential.txt", s);
+#endif
     }
 
     private void LogPress(string s, bool allowed)
@@ -198,7 +202,11 @@ public class GameManager : MonoBehaviour
         previousKeyPressTime = Time.time;
 
         Debug.Log(log);
+#if WINDOWS_UWP
+        FileUtils.AppendTextToFile(currentUserCode + "_press.txt", log);
+#else
         FileUtils.AppendTextToFile(Application.dataPath + "/" + currentUserCode + "_press.txt", log);
+#endif
     }
 
     private void NetworkUtils_OnMessageReceived(string message)
