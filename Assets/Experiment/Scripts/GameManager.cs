@@ -25,6 +25,7 @@ public class GameManager : MonoBehaviour
     private float timeLeft;
     public RectTransform panelTime;
     private static float SESSION_TIMING;
+    private float previousKeyPressTime;
 
     async void Start()
     {
@@ -143,6 +144,7 @@ public class GameManager : MonoBehaviour
         inputFieldTranscribed.text = "_";
         fullTranscribedInputStream = "";
         keyStrokeCount = 0;
+        previousKeyPressTime = -1f;
         string phrase = "abcdefghijklmnopqrstuvwxyz";
         if (started)
         {
@@ -158,7 +160,7 @@ public class GameManager : MonoBehaviour
     private void LogEssential(string presentedText, string transcribedText, float WPM, float ER)
     {
         float KSPC = TypingUtils.KSPC(keyStrokeCount-1, transcribedText); // minus 1 to remove Enter keystroke
-        string s = System.DateTime.Now.ToString("yyyy-mm-dd hh:mm:ss.fff") + "\t" +
+        string s = System.DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss.fff") + "\t" +
             currentUserCode + "\t" +
             currentTextEntryInterface + "\t" +
             presentedText + "\t" +
@@ -175,11 +177,23 @@ public class GameManager : MonoBehaviour
 
     private void LogPress(string s, bool allowed)
     {
-        string log = System.DateTime.Now.ToString("yyyy-mm-dd hh:mm:ss.fff") + "\t" +
+        float interKeyPressTime;
+        if (previousKeyPressTime == -1f) // first letter of the phrase
+        {
+            interKeyPressTime = -1f;
+        }
+        else
+        {
+            interKeyPressTime = Time.time - previousKeyPressTime;
+        }
+        string log = System.DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss.fff") + "\t" +
             currentUserCode + "\t" +
             currentTextEntryInterface + "\t" +
             allowed + "\t" +
-            s + "\n";
+            s + "\t" + 
+            interKeyPressTime + "\n";
+        previousKeyPressTime = Time.time;
+
         Debug.Log(log);
         FileUtils.AppendTextToFile(Application.dataPath + "/" + currentUserCode + "_press.txt", log);
     }
