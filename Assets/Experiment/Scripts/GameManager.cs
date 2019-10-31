@@ -95,7 +95,10 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            LogPress(s, true);
+            if (started)
+            {
+                LogPress(s, true);
+            }            
             fullTranscribedInputStream += s;
             keyStrokeCount += 1;
 
