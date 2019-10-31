@@ -26,9 +26,16 @@ public class GameManager : MonoBehaviour
     public RectTransform panelTime;
     private static float SESSION_TIMING;
     private float previousKeyPressTime;
+    private string logPressBulk;
 
     async void Start()
     {
+
+#if WINDOWS_UWP
+        GameObject.Find("SceneContent").GetComponent<RadialView>().MinDistance = 2f;
+        GameObject.Find("SceneContent").GetComponent<RadialView>().MaxDistance = 2f;
+#endif
+
         keyboard.GetComponent<Keyboard>().OnKeyPress += Keyboard_OnKeyPress;
         keyboard.SetActive(false);
 
@@ -122,6 +129,7 @@ public class GameManager : MonoBehaviour
                 if (started)
                 {
                     LogEssential(textPresented.text, currentTranscribedText, wpm, er);
+                    BulkLogPress();
                 }                
                 SetPhrase();
                 return;
@@ -202,11 +210,18 @@ public class GameManager : MonoBehaviour
         previousKeyPressTime = Time.time;
 
         Debug.Log(log);
+        logPressBulk += log;
+    }
+
+    // to avoid too many writing
+    private void BulkLogPress()
+    {
 #if WINDOWS_UWP
-        FileUtils.AppendTextToFile(currentUserCode + "_press.txt", log);
+        FileUtils.AppendTextToFile(currentUserCode + "_press.txt", logPressBulk);
 #else
-        FileUtils.AppendTextToFile(Application.dataPath + "/" + currentUserCode + "_press.txt", log);
+        FileUtils.AppendTextToFile(Application.dataPath + "/" + currentUserCode + "_press.txt", logPressBulk);
 #endif
+        logPressBulk = "";
     }
 
     private void NetworkUtils_OnMessageReceived(string message)
