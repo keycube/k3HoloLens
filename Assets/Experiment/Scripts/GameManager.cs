@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
+using Microsoft.MixedReality.Toolkit.Utilities.Solvers;
 
 public class GameManager : MonoBehaviour
 {
@@ -42,7 +43,7 @@ public class GameManager : MonoBehaviour
 
         inputFieldTranscribed.Select();
 
-        string s = await FileUtils.ReadTextFile("Assets/Experiment/Resources/phrases2.txt"); 
+        string s = await FileUtils.ReadTextFile("Assets/Experiment/Resources/phrases2.txt");
         phrases = new List<string>(s.Split('\n'));
 
         NetworkUtils network = new NetworkUtils();

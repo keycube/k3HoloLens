@@ -369,7 +369,7 @@ MonoBehaviour:
   minDistance: 1
   maxDistance: 1
   minViewDegrees: 0
-  maxViewDegrees: 50
+  maxViewDegrees: 30
   aspectV: 1
   ignoreAngleClamp: 0
   ignoreDistanceClamp: 0
@@ -873,7 +873,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: -0.0390625, y: 0, z: 7.2000003, w: 6.4}
+  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
   m_ShadowRadius: 0
   m_ShadowAngle: 0
@@ -2414,6 +2414,11 @@ PrefabInstance:
         type: 3}
       propertyPath: maxDistance
       value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 9150466188195727320, guid: b4e081dcf07974d2c92c53daea8481ca,
+        type: 3}
+      propertyPath: maxViewDegrees
+      value: 15
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b4e081dcf07974d2c92c53daea8481ca, type: 3}
